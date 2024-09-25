@@ -24,7 +24,7 @@ The system consists of multiple components that work together to provide loan ap
 
 2. **Swagger UI for API Testing:** The APIs are documented using Swagger UI, where users can test endpoints for loan predictions.
 
- ![alt text](./2.png)
+   ![alt text](./2.png)
 
 3. **Making a Loan Prediction (First Case):** The user inputs the necessary details about the loan and the model returns the prediction about whether the loan will be approved along with the interest rate.
 
