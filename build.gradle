@@ -1,0 +1,106 @@
+buildscript {
+    ext {
+        springBootVersion = '2.7.5'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.gonnect.deeplearning'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    flatDir { dirs "lib" }
+    mavenCentral()
+}
+
+dependencies {
+    // Other dependencies...
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    implementation name: 'h2o-genmodel'
+
+    // springdoc dependencies for OpenAPI
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
+    // JAXB for Java 11 support
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+
+    // Test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+//-------------------------------------------------------------------
+// Custom tasks for generating the model POJOs
+//-------------------------------------------------------------------
+
+task deleteTmp(type: Delete) {
+    delete "tmp"
+}
+
+task runScript(type: Exec, dependsOn: deleteTmp) {
+    if (project.hasProperty("pythonBasedMLModel") && project.pythonBasedMLModel == "true") {
+        commandLine "python3", "loan-approver-model.py"
+    } else {
+        commandLine "C:/Program Files/R/R-4.4.1/bin/R.exe", "-f", "loan-approver-model.R"
+    }
+    doLast {
+        println "Running R script: loan-approver-model.R"
+    }
+}
+
+task placeGenModelJar(type: Copy, dependsOn: runScript) {
+    from "tmp/h2o-genmodel.jar"
+    into "lib"
+}
+
+task placeBadLoanModel(type: Copy, dependsOn: placeGenModelJar) {
+    doLast {
+        String fileContents = new File("tmp/AtrociousLoanModel.java").text
+        File outf = new File("src/main/java/com/gonnect/deeplearning/loanapprover/model/AtrociousLoanModel.java")
+        outf.write("package com.gonnect.deeplearning.loanapprover.model;\n" + "\n" + fileContents)
+    }
+}
+
+task placeInterestRateModel(type: Copy, dependsOn: placeGenModelJar) {
+    doLast {
+        String fileContents = new File("tmp/LoanInterestRateModel.java").text
+        File outf = new File("src/main/java/com/gonnect/deeplearning/loanapprover/model/LoanInterestRateModel.java")
+        outf.write("package com.gonnect.deeplearning.loanapprover.model;\n" + "\n" + fileContents)
+    }
+}
+
+task generateModels(dependsOn: [placeBadLoanModel, placeInterestRateModel]) {
+    doLast {
+        println "Models have been generated."
+    }
+}
+
+compileJava.dependsOn generateModels
+
+//-------------------------------------------------------------------
+// Custom task for cleaning up generated files
+//-------------------------------------------------------------------
+
+task cleanGenerated(type: Delete) {
+    delete "tmp",
+            "lib/h2o-genmodel.jar",
+            "src/main/java/com/gonnect/deeplearning/loanapprover/model/AtrociousLoanModel.java",
+            "src/main/java/com/gonnect/deeplearning/loanapprover/model/LoanInterestRateModel.java"
+}
+
+clean.dependsOn cleanGenerated
