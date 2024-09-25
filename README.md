@@ -1,161 +1,108 @@
-# QuickLoanPrediction - Loan Approver Using Spring BOOT and H2O AutoML [Rule Based To ML Based Loan Prediction]
+# QuickLoanPrediction - Loan Approver Using Spring Boot and H2O AutoML
 
-## Introduction
+## Overview
 
-This project demonstrates a loan approval application built using **Spring Boot** and **H2O’s AutoML**. The goal of the application is to predict whether a loan should be approved and what interest rate should be offered. The system makes use of **Gradient Boosting Models** for binary classification and regression tasks based on the provided dataset. 
+This project is a Loan Approver application developed using **Spring Boot** and **H2O AutoML**. The aim of this project is to predict whether a loan should be approved based on user input and to determine the loan's interest rate for approved loans. The system incorporates both **binary classification** for loan approval and **regression** for predicting the interest rate.
 
-Here are the key features of the application:
+The entire process involves REST APIs that connect with machine learning models for real-time predictions, and the system is dockerized to ensure smooth deployment.
 
-1. **ML as a service using Spring Boot**
-2. **Dockerize ML model + REST API**
-3. **Polygot programming model**: Loan Approver model & interest calculation is written in **Python/R**
-4. **Model stored as POJO (Plain Old Java Object)**
+### Key Features:
+- Loan approval prediction using machine learning.
+- Integration of **H2O AutoML** for model building and prediction.
+- REST API endpoints for real-time interaction with the system.
+- Dockerized for easy deployment.
 
-Note: This project showcases the integration of machine learning with **Spring Boot** as a REST API. It allows rolling out new versions of the model seamlessly and performing A/B testing in real-time production systems.
+---
 
-The architecture of the Loan Approver application allows:
-1. **Programmers** to use their preferred programming languages (Python/R) and frameworks.
-2. **Ease of production deployment** through Dockerization.
-3. **Seamless integration of ML models as REST APIs using Spring Boot** for real-time prediction.
+## Application Flow
 
-This architecture style is useful for multiple use cases, including:
-- Health insurance fraud detection
-- ePayment card fraud detection
-- Retail (eCommerce) inventory optimization
-- And more...
+The system consists of multiple components that work together to provide loan approval predictions.
 
-## Loan Approver Application Overview
+1. **User Authentication:** The user must first sign in using the credentials to access the system.
+   ![alt text](./1.png)
 
-The **QuickLoanPrediction** system is a smart application that uses machine learning to decide whether a loan should be approved. It consists of two predictive models:
+2. **Swagger UI for API Testing:** The APIs are documented using Swagger UI, where users can test endpoints for loan predictions.
+   ![alt text](./2.png)
 
-- **Loan Approval Model**: Predicts whether the loan is a bad loan (yes/no)
-- **Interest Rate Model**: Predicts the interest rate if the loan is approved.
+3. **Making a Loan Prediction (First Case):** The user inputs the necessary details about the loan and the model returns the prediction about whether the loan will be approved along with the interest rate.
+   ![alt text](./3.png)
 
-The model is created following these steps:
+4. **Making a Loan Prediction (Second Case):** A different set of inputs are given to the system to test a loan prediction. The system responds with whether the loan is approved or declined and the expected interest rate.
+   ![alt text](./4.png)
 
-- Step 1: Prepare the model to answer the prediction question.
-- Step 2: Use relevant data to create the model.
-- Step 3: Export the model as a Java POJO.
-- Step 4: Compile the Java model using Gradle.
-- Step 5: Deploy the model using **Spring Boot** on **Tomcat**.
-- Step 6: Expose the model as a REST API along with dependent variables, and provide a Swagger UI for testing.
+5. **H2O Flow UI for Monitoring Models:** The **H2O Flow UI** is used to manage, monitor, and visualize the performance of the models running in the background. It assists in checking data frames, models, and predictions.
+   ![alt text](./5.png)
 
-## Machine Learning Data Model
+6. **Loan Approval Prediction Flow:** The image below describes the complete prediction flow, including how dependent variables are processed by the system to predict whether the loan is approved and what interest rate should be applied.
+   ![alt text](./6.png)
 
-| **Predictor/Independent Variable** | **Description**                              | Units        |
-| ---------------------------------- | --------------------------------------------- | ------------ |
-| loan_amnt                          | Requested loan amount                         | US dollars   |
-| term                               | Loan term length                              | months       |
-| emp_length                         | Employment length                             | years        |
-| home_ownership                     | Housing status                                | categorical  |
-| annual_inc                         | Annual income                                 | US dollars   |
-| verification_status                | Income verification status                    | categorical  |
-| purpose                            | Purpose for the loan                          | categorical  |
-| addr_state                         | State of residence                            | categorical  |
-| dti                                | Debt to income ratio                          | percentage   |
-| delinq_2yrs                        | Number of misdemeanors in the past 2 years     | integer      |
-| revol_util                         | Revolving credit line utilization             | percentage   |
-| total_acc                          | Total number of credit lines                  | integer      |
-| longest_credit_length              | Age of the oldest active credit account        | years        |
-
-### Dependent Variables:
-
-| **Dependent Variable** | **Description**                             | **Model Category**         |
-| ---------------------- | --------------------------------------------| ---------------------------|
-| bad_loan               | Is the loan likely to be bad (approved/not)? | Binomial Classification     |
-| int_rate               | Predicted loan interest rate                 | Regression                  |
-
-Following is the application flow for the loan approver:
-
-![alt text](./LoanApproverApplicationFlow.png)
-
-## Model Information
-
-| Atrocious Loan Model                         | Interest Rate Model                              |
-| -------------------------------------------- | ------------------------------------------------ |
-| **Algorithm**: GBM                           | **Algorithm**: GBM                               |
-| **Model Category**: Binary Classification    | **Model Category**: Regression                   |
-| **ntrees**: 100                              | **ntrees**: 100                                  |
-| **max_depth**: 5                             | **max_depth**: 5                                 |
-| **learn_rate**: 0.05                         | **learn_rate**: 0.05                             |
-| **AUC on valid**: 0.685                      | **MSE**: 11.1                                    |
-| **Max F1**: 0.22                             | **R2**: 0.424                                    |
+---
 
 ## Tech Stack
 
-- Build Tool: **Gradle**
-- Machine Learning: **Python/R**, **H2O**, **Six**
-- REST API: **Java**, **Spring Boot**, **Spring Security**
+- **Spring Boot:** Backend development and API integration.
+- **H2O AutoML:** Automatic machine learning model building for loan approval and interest rate prediction.
+- **Swagger UI:** API documentation and testing interface.
+- **Docker:** Containerization of the application for easier deployment and scaling.
+- **Gradle:** Build automation tool for compiling the project.
+- **H2O Flow UI:** Interface to monitor model performance and tune the ML models.
 
-### Note:
-Before running the build scripts, ensure to create a virtual environment and install **Python 3.6+**, **H2O**, and **Six** modules.
+---
+
+## How It Works
+
+### 1. Model Prediction Logic
+
+The prediction model is built using **H2O’s AutoML**, which automatically selects the best machine learning algorithms based on the input data. The following two tasks are performed:
+- **Loan Approval:** A classification task to predict whether the loan will be approved (yes/no).
+- **Interest Rate Prediction:** A regression task to predict the interest rate for the approved loans.
+
+### 2. API Endpoints
+
+- **POST /loan/approver/predict:** Used to input loan details and retrieve approval status and interest rate.
+- **GET /loan/approver/version:** Returns the current version of the API.
+
+---
 
 ## Running the Application
 
-### 1. Build the Project
+### Prerequisites
 
-To build the project and generate the POJO models from Python/R scripts, use the following commands:
+Before running the application, make sure to install the following:
 
-./gradlew build # Run R script (loan-approver-model.R) to generate POJOs 
-./gradlew build -PpythonBasedMLModel=true # Run Python script (loan-approver-model.py) to generate POJOs
+- Java 8+
+- Docker (if using Docker for containerization)
+- Gradle
 
-![alt text](./loanapprovermodelgeneration.png)
+### Steps
 
-### 2. Run the Loan Approver Spring Boot Application
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+Build the application:
 
-After building the project, you can run the Loan Approver application using the command:
-
-java -jar loanapprover-0.0.1-SNAPSHOT.jar
-
-Alternatively, the application can be containerized using Docker:
-
-1. Build the Docker image:
-    ```
-    docker build -t loanapprover .
-    ```
-
-2. Run the Docker container:
-    ```
-    docker run loanapprover
-    ```
-
-![alt text](./LoanApproverDocker.png)
-
-### 3. Swagger Documentation
-
-The API can be tested using Swagger UI. Access the Swagger documentation at:
-
-http://localhost:8080/swagger-ui.html
-
-vbnet
+bash
 Copy code
+./gradlew build
+Run the Spring Boot application:
 
-![alt text](./SwaggerLoanApproverAPIs.png)
+bash
+Copy code
+java -jar build/libs/loanapprover-0.0.1-SNAPSHOT.jar
+Access the Swagger UI: Open a browser and navigate to: http://localhost:8080/swagger-ui.html
 
-### Sample Output
-The prediction output will return a JSON object like the following:
+Dockerize the Application (Optional):
 
-{ "labelIndex": 0, "label": "0", "classProbabilities": [ 0.8777492684744649, 0.12225073152553513 ], "interestRate" : 12.079950220424134 }
+Build the Docker image:
 
-#### Notes:
+bash
+Copy code
+docker build -t loanapprover .
+Run the Docker container:
 
-- **Label Interpretation**:
-
-| **Label** | **Meaning**                       |
-| --------- | --------------------------------- |
-| 1         | Atrocious Loan - Not Approved     |
-| 0         | Good Loan - Approved              |
-
-### 4. Download the h2o-genmodel.jar
-
-You need to download the **h2o-genmodel.jar** file and store it in the `lib` folder:
-
-curl http://localhost:54321/3/h2o-genmodel.jar > h2o-genmodel.jar
-
-### 5. H2O Flow UI
-
-To visualize the machine learning model and results, access the **H2O Flow** UI at:
-
-http://127.0.0.1:54321/flow/index.html
-
-![alt text](./h2o.png)
+bash
+Copy code
+docker run -p 8080:8080 loanapprover
+Notes
+Make sure to test the API endpoints using Swagger for a seamless experience.
